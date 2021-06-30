@@ -909,7 +909,8 @@ if (preferred->ai_family == AF_INET6) {
     sta = setsockopt (newsock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&off, sizeof(off));
     }
 #endif
-if (opt_flags & SIM_SOCK_OPT_REUSEADDR) {
+/* ここのopt_flagsが原因でsimhが再接続できていなかった */
+ if (/* opt_flags & */ SIM_SOCK_OPT_REUSEADDR) {
     int on = 1;
 
     sta = setsockopt (newsock, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
@@ -1014,7 +1015,7 @@ if (!(opt_flags & SIM_SOCK_OPT_DATAGRAM)) {
     int keepalive = 1;
 
     /* enable TCP Keep Alives */
-    sta = setsockopt (newsock, SOL_SOCKET, SO_KEEPALIVE, (char *)&keepalive, sizeof(keepalive));
+    sta = setsockopt (newsock, SOL_SOCKET, SO_REUSEPORT, (char *)&keepalive, sizeof(keepalive)); /* たぶんここがあやしい(ちがう) */
     if (sta == -1) 
         return sim_err_sock (newsock, "setsockopt KEEPALIVE");
     }
@@ -1093,7 +1094,7 @@ if ((opt_flags & SIM_SOCK_OPT_NODELAY)) {
     }
 
 /* enable TCP Keep Alives */
-sta = setsockopt (newsock, SOL_SOCKET, SO_KEEPALIVE, (char *)&keepalive, sizeof(keepalive));
+sta = setsockopt (newsock, SOL_SOCKET, SO_REUSEADDR, (char *)&keepalive, sizeof(keepalive));
 if (sta == -1) 
     return sim_err_sock (newsock, "setsockopt KEEPALIVE");
 
